@@ -12,25 +12,29 @@ constexpr int WINDOW_HEIGHT = 500;
 constexpr std::string TITLE = "Window title";
 
 
-Animation girlIdleAnim = loadAnimation("Sprites/Brawler-Girl/Idle", "idle", 4);
-Animation girlWalkAnim = loadAnimation("Sprites/Brawler-Girl/Walk", "walk", 10);
-Animation girlPunchAnim = loadAnimation("Sprites/Brawler-Girl/Punch", "punch", 3);
+Animation samuraiIdleAnim = loadAnimation("Sprites/Samurai/Idle", "idle", 10);
+Animation samuraiRunAnim = loadAnimation("Sprites/Samurai/Run", "run", 16);
 
-std::map<std::string, Animation> animationMap{
-    {"idle", girlIdleAnim},
-    {"walk", girlWalkAnim},
-    {"punch", girlPunchAnim}
+std::map<std::string, Animation> samuraiAnimMap{
+    {"idle", samuraiIdleAnim},
+    {"run", samuraiRunAnim}
 };
 
+Animation knightIdleAnim = loadAnimation("Sprites/Knight/Idle", "idle", 10);
+
+std::map<std::string, Animation> knightAnimMap{
+    {"idle", knightIdleAnim}
+};
 
 
 int main() {
 
     TDT4102::AnimationWindow window(WINDOW_X, WINDOW_Y, WINDOW_WIDTH, WINDOW_HEIGHT, TITLE);
     TDT4102::Point point(100, 100);
+    TDT4102::Point point2(200, 100);
 
-    Entity girlEntity{point, animationMap};
-
+    Entity knightEntity{point, knightAnimMap};
+    Entity samuraiEntity{point2, samuraiAnimMap};
     
 
     
@@ -42,16 +46,16 @@ int main() {
         bool dKeyIsPressed = window.is_key_down(KeyboardKey::D);
         
         if (rKeyIsPressed) {
-            girlEntity.setAnimation("walk");
+            knightEntity.setAnimation("walk");
         }
         if (tKeyIsPressed) {
-            girlEntity.setAnimation("idle");
+            knightEntity.setAnimation("idle");
         }   
         if (yKeyIsPressed) {
-            girlEntity.setAnimation("punch");
+            knightEntity.setAnimation("punch");
         }
         if (dKeyIsPressed) {
-            girlEntity.move(1, 0);
+            knightEntity.move(1, 0);
         }
 
         auto currentTime = std::chrono::steady_clock::now();
@@ -59,8 +63,12 @@ int main() {
         double dt = deltaTime.count();
         lastTime = currentTime;
 
-        girlEntity.draw(window);
-        girlEntity.update(dt);
+
+        samuraiEntity.draw(window);
+        knightEntity.draw(window);
+
+        samuraiEntity.update(dt);
+        knightEntity.update(dt);
 
 
         window.next_frame();
