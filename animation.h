@@ -2,7 +2,10 @@
 #include <vector>
 #include "AnimationWindow.h"
 #include <map>
+#include <string>
+#include <iostream>
 
+Animation loadAnimation(std::string folder, std::string prefix, int frameCount);
 
 class Animation {
     private:
@@ -24,19 +27,22 @@ class Animator {
         void nextFrame();
         void setAnimation(Animation& anim);
 
-        Animator(Animation& anim) : animation(&anim), currentFrame(0) {}
+        Animator(Animation& anim) : animation(&anim), currentFrame(0) {};
 
 };
 
 class Entity {
     private:
-        Animator animator;
         TDT4102::Point position;
         std::map<std::string, Animation> animations;
+        Animator animator; // Rekkefølge er kritisk
     public:
         void draw(TDT4102::AnimationWindow& window);
         TDT4102::Point getPosition();
         void update();
+        void setAnimation(std::string name);
 
-        Entity(Animator animr, TDT4102::Point pos) : animator(animr), position(pos) {}
+        Entity(TDT4102::Point pos, std::map<std::string, Animation> animMap)
+            : position(pos), animations(animMap), animator(animations.at("idle")) {};  
 };
+
