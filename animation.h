@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include "AnimationWindow.h"
+#include <map>
 
 
 class Animation {
@@ -15,25 +16,27 @@ class Animation {
 
 class Animator {
     private:
-        Animation& animation;
+        Animation* animation;
         int currentFrame;
     public:
         TDT4102::Image& getCurrentImage();
 
         void nextFrame();
+        void setAnimation(Animation& anim);
 
-        Animator(Animation& anim) : animation(anim), currentFrame(0) {} // Initializer list 
+        Animator(Animation& anim) : animation(&anim), currentFrame(0) {}
 
 };
 
 class Entity {
     private:
         Animator animator;
-        TDT4102::Point pos;
+        TDT4102::Point position;
+        std::map<std::string, Animation> animations;
     public:
         void draw(TDT4102::AnimationWindow& window);
         TDT4102::Point getPosition();
         void update();
 
-        Entity(Animator animr) : animator(animr), pos(100, 100) {}
+        Entity(Animator animr, TDT4102::Point pos) : animator(animr), position(pos) {}
 };

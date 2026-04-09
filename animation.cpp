@@ -18,11 +18,11 @@ void Animator::nextFrame() {
 }
 
 void Entity::draw(TDT4102::AnimationWindow& window) {
-    window.draw_image(pos, animator.getCurrentImage());
+    window.draw_image(position, animator.getCurrentImage());
 }
 
 TDT4102::Point Entity::getPosition() {
-    return pos;
+    return position;
 }
 
 void Entity::update() {

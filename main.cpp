@@ -19,9 +19,10 @@ std::vector<TDT4102::Image> vec{idle1, idle2, idle3, idle4};
 int main() {
 
     TDT4102::AnimationWindow window(WINDOW_X, WINDOW_Y, WINDOW_WIDTH, WINDOW_HEIGHT, TITLE);
+    TDT4102::Point point(100, 100);
     Animation girlAnim{vec};
     Animator girlAnimator{girlAnim};
-    Entity girlEntity{girlAnimator};
+    Entity girlEntity{girlAnimator, point};
 
     while(!window.should_close()) {
         girlEntity.draw(window);
