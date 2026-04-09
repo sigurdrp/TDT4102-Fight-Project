@@ -5,8 +5,6 @@
 #include <string>
 #include <iostream>
 
-Animation loadAnimation(std::string folder, std::string prefix, int frameCount);
-
 class Animation {
     private:
         std::vector<TDT4102::Image> frames;
@@ -21,13 +19,16 @@ class Animator {
     private:
         Animation* animation;
         int currentFrame;
+        double frameDuration;
+        double timeSinceLastFrame;
     public:
         TDT4102::Image& getCurrentImage();
-
         void nextFrame();
         void setAnimation(Animation& anim);
+        void update(double dt);
 
-        Animator(Animation& anim) : animation(&anim), currentFrame(0) {};
+        Animator(Animation& anim) 
+            : animation(&anim), currentFrame(0), frameDuration(0.1), timeSinceLastFrame(0) {};
 
 };
 
@@ -39,8 +40,9 @@ class Entity {
     public:
         void draw(TDT4102::AnimationWindow& window);
         TDT4102::Point getPosition();
-        void update();
+        void update(double dt);
         void setAnimation(std::string name);
+        void move(int dx, int dy);
 
         Entity(TDT4102::Point pos, std::map<std::string, Animation> animMap)
             : position(pos), animations(animMap), animator(animations.at("idle")) {};  
