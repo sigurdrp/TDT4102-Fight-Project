@@ -82,6 +82,11 @@ struct Box {
     int height();
 };
 
+enum class AttackVariant {
+    First,
+    Second
+};
+
 class Entity {
     private:
         Position position;
@@ -91,10 +96,11 @@ class Entity {
         float scale = 1.0f;
         std::string currentAnimation = "idle";
         Box hurtbox;
+        Box hitbox;
 
         MovementState movementState = MovementState::Idle;
         ActionState actionState = ActionState::None;
-        int currentAttackIndex = 1;
+        AttackVariant currentAttackVariant = AttackVariant::First;
         bool attackQueued = false;
 
         Velocity velocity{0, 0};
@@ -121,20 +127,33 @@ class Entity {
         void updatePosition(double dt);
         void setDirection(Direction direction);
         void attack();
-        void drawHurtbox(TDT4102::AnimationWindow& window);
-        Box getWorldHurtbox();
+        void drawBox(TDT4102::AnimationWindow& window, Box box);
+        Box getWorldBox(Box box);
+        Box getHurtBox();
+        Box getHitBox();
+
+        void updateMovement(double dt);
+        void updateAnimationState();
+        void handleFinishedAnimation();
+        void applyDeceleration(double dt);
+        void continueAttackCombo();
+        void playCurrentAttackAnimation();
+        void updateDirectionFromVelocity();
         
 
-        Entity(TDT4102::Point pos, std::map<std::string, Animation> animMap, int spriteWidth, int spriteHeight, float scl, Box hbx)
+        Entity(TDT4102::Point pos, std::map<std::string, Animation> animMap, 
+               int spriteWidth, int spriteHeight, float scl, Box hrtbx, Box htbx)
             : position{pos.x, pos.y}, 
               animations(animMap), 
               animator(animations.at("idle")), 
               size{spriteWidth, spriteHeight}, 
               scale(scl),
-              hurtbox(hbx)
+              hurtbox(hrtbx),
+              hitbox(htbx)
             {
                 setScale(scale);
             };  
 };
 
 bool intersects(Box a, Box b);
+

@@ -50,26 +50,13 @@ void Entity::draw(TDT4102::AnimationWindow& window) {
 
 
 void Entity::update(double dt) {
-    updateVelocity(dt);
-    updateMovementState();
-    updatePosition(dt);
-    resolveAnimation(); 
+    updateMovement(dt);
+    updateAnimationState();
 
     bool animatorFinished = animator.update(dt);
     if (animatorFinished) {
-        if (actionState == ActionState::Attack) {
-            if (!attackQueued) {
-                actionState = ActionState::None;
-            }
-            else {
-                attackQueued = false;
-                currentAttackIndex = (currentAttackIndex == 1) ? 2 : 1;
-                std::string attackToAnimate = "attack" + std::to_string(currentAttackIndex);
-                setAnimation(attackToAnimate, false);
-            }
-        }
+        handleFinishedAnimation();
     }
-
 }
 
 void Entity::setAnimation(std::string name, bool shouldLoop) {
@@ -90,19 +77,23 @@ void Entity::setScale(float newScale) {
     hurtbox.top *= newScale;
     hurtbox.right *= newScale;
     hurtbox.bottom *= newScale;
+    hitbox.left *= newScale;
+    hitbox.top *= newScale;
+    hitbox.right *= newScale;
+    hitbox.bottom *= newScale;
 }
 
 void Entity::resolveAnimation() {
     if (actionState != ActionState::None) {
         return;
     }
-    if (movementState == MovementState::Idle) {
+    else if (movementState == MovementState::Idle) {
         setAnimation("idle", true);
     }
-    if (movementState == MovementState::Turning) {
+    else if (movementState == MovementState::Turning) {
         setAnimation("turn", false);
     }
-    if (movementState == MovementState::Running) {
+    else if (movementState == MovementState::Running) {
         setAnimation("run", true);
     }
 }
@@ -113,7 +104,9 @@ void Entity::setActionState(ActionState a) {actionState = a;}
 void Entity::attack() {
     if (actionState == ActionState::None) {
         actionState = ActionState::Attack;
-        setAnimation("attack1", false);
+        currentAttackVariant = AttackVariant::First;
+        attackQueued = false;
+        playCurrentAttackAnimation();
     }
     else if (actionState == ActionState::Attack) {
         attackQueued = true;
@@ -126,41 +119,22 @@ void Entity::setMoveIntent(MoveIntent intent) {
 
 void Entity::updateVelocity(double dt) {
     if (actionState == ActionState::Attack) {
-                if (velocity.x < 0) {
-            velocity.x += deceleration * dt;
-            velocity.x = std::clamp(velocity.x, -maxSpeed, 0.0f);
-        }
-        else if (velocity.x > 0) {
-            velocity.x -= deceleration * dt;
-            velocity.x = std::clamp(velocity.x, 0.0f, maxSpeed);
-        }
+        applyDeceleration(dt);
     }
-    if (moveIntent == MoveIntent::Right) {
-        velocity.x += (acceleration * dt);
+    else if (moveIntent == MoveIntent::Right) {
+        velocity.x += acceleration * dt;
         velocity.x = std::clamp(velocity.x, -maxSpeed, maxSpeed);
     }
     else if (moveIntent == MoveIntent::Left) {
-        velocity.x -= (acceleration * dt);
+        velocity.x -= acceleration * dt;
         velocity.x = std::clamp(velocity.x, -maxSpeed, maxSpeed);
     }
-    else if (moveIntent == MoveIntent::None) {
-        if (velocity.x < 0) {
-            velocity.x += deceleration * dt;
-            velocity.x = std::clamp(velocity.x, -maxSpeed, 0.0f);
-        }
-        else if (velocity.x > 0) {
-            velocity.x -= deceleration * dt;
-            velocity.x = std::clamp(velocity.x, 0.0f, maxSpeed);
-        }
+    else {
+        applyDeceleration(dt);
     }
-    if (velocity.x > 0) {
-        setDirection(Direction::Right);
-    }
-    else if (velocity.x < 0) {
-        setDirection(Direction::Left);
-    }
-}
 
+    updateDirectionFromVelocity();
+}
 void Entity::updatePosition(double dt) {
     position.x += velocity.x * dt;
 }
@@ -182,11 +156,9 @@ void Entity::setDirection(Direction dir) {
     direction = dir;
 }
 
-void Entity::drawHurtbox(TDT4102::AnimationWindow& window) {
-    Box worldHurtBox = getWorldHurtbox();
-    TDT4102::Point topLeftCorner{worldHurtBox.left, worldHurtBox.right};
-    TDT4102::Color color = TDT4102::Color::red;
-    // window.draw_rectangle(topLeftCorner, worldHurtBox.width(), worldHurtBox.height());
+void Entity::drawBox(TDT4102::AnimationWindow& window, Box box) {
+    TDT4102::Point topLeftCorner{box.left, box.top};
+    window.draw_rectangle(topLeftCorner, box.width(), box.height());
 }
 
 bool intersects(Box a, Box b) {
@@ -196,10 +168,90 @@ bool intersects(Box a, Box b) {
              a.top > b.bottom);
 }
 
-Box Entity::getWorldHurtbox() {
-    return Box{static_cast<int>(position.x) + hurtbox.left, 
-               static_cast<int>(position.y) + hurtbox.top, 
-               static_cast<int>(position.x) + hurtbox.right,
-               static_cast<int>(position.y) + hurtbox.bottom
-            };
+Box Entity::getWorldBox(Box box) {
+    return Box{static_cast<int>(position.x) + box.left, 
+               static_cast<int>(position.y) + box.top, 
+               static_cast<int>(position.x) + box.right,
+               static_cast<int>(position.y) + box.bottom
+    };
+}
+
+int Box::width() {
+    return right - left;
+}
+int Box::height() {
+    return bottom - top;
+}
+
+void Entity::updateMovement(double dt) {
+    updateVelocity(dt);
+    updateMovementState();
+    updatePosition(dt);
+}
+
+void Entity::updateAnimationState() {
+    resolveAnimation();
+}
+
+void Entity::handleFinishedAnimation() {
+    if (actionState != ActionState::Attack) {
+        return;
+    }
+
+    if (attackQueued) {
+        continueAttackCombo();
+    }
+    else {
+        actionState = ActionState::None;
+    }
+}
+
+void Entity::applyDeceleration(double dt) {
+    if (velocity.x < 0) {
+        velocity.x += deceleration * dt;
+        velocity.x = std::clamp(velocity.x, -maxSpeed, 0.0f);
+    }
+    else if (velocity.x > 0) {
+        velocity.x -= deceleration * dt;
+        velocity.x = std::clamp(velocity.x, 0.0f, maxSpeed);
+    }
+}
+
+void Entity::continueAttackCombo() {
+    attackQueued = false;
+
+    if (currentAttackVariant == AttackVariant::First) {
+        currentAttackVariant = AttackVariant::Second;
+    }
+    else {
+        currentAttackVariant = AttackVariant::First;
+    }
+
+    playCurrentAttackAnimation();
+}
+
+void Entity::playCurrentAttackAnimation() {
+    if (currentAttackVariant == AttackVariant::First) {
+        setAnimation("attack1", false);
+    }
+    else {
+        setAnimation("attack2", false);
+    }
+}
+
+void Entity::updateDirectionFromVelocity() {
+    if (velocity.x > 0) {
+        setDirection(Direction::Right);
+    }
+    else if (velocity.x < 0) {
+        setDirection(Direction::Left);
+    }
+}
+
+Box Entity::getHurtBox() {
+    return hurtbox;
+}
+
+Box Entity::getHitBox() {
+    return hitbox;
 }

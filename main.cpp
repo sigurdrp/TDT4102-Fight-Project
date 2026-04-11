@@ -35,6 +35,7 @@ std::map<std::string, Animation> knightAnimMap{
 };
 
 Box knightHurtbox{50, 43, 61, 79}; // ingen bedre måte å gjøre dette ;-; magic numbers
+Box knightHitbox{62, 43, 85, 79};
 
 
 int main() {
@@ -43,7 +44,7 @@ int main() {
     TDT4102::Point point(0, 100);
     TDT4102::Point point2(200, 100);
 
-    Entity knightEntity{point, knightAnimMap, 120, 80, 2, knightHurtbox};
+    Entity knightEntity{point, knightAnimMap, 120, 80, 2, knightHurtbox, knightHitbox};
 
     bool spaceWasPressed = false;
 
@@ -77,8 +78,10 @@ int main() {
         }
 
         knightEntity.update(dt);
+        knightEntity.drawBox(window, knightEntity.getWorldBox(knightEntity.getHurtBox()));
+        knightEntity.drawBox(window, knightEntity.getWorldBox(knightEntity.getHitBox()));
         knightEntity.draw(window);
-        // knightEntity.drawHurtbox(window);
+        
 
 
         window.next_frame();
