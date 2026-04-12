@@ -12,3 +12,13 @@ Animation loadAnimation(std::string folder, std::string prefix, int frameCount) 
     }
     return Animation(frames);
 }
+
+// // ---------- Boxes ---------- /*
+// Box knightHurtbox{50, 43, 61, 79};
+// Box knightHitbox {62, 43, 105, 79};
+
+// Box bossHurtbox{108, 55, 148, 111};
+
+// // Manuell justering av bossens angreps-hitbokser:
+// Box bossHeavyComboHitbox{120, 55, 220, 150};
+// Box bossTornadoHitbox   {50,  40, 200, 155};

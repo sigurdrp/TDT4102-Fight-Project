@@ -6,8 +6,12 @@
 #include "SDL_render.h"
 
 namespace TDT4102 {
-    enum class FlipImage {
-        NONE, HORIZONTAL, VERTICAL
+    enum class FlipImage { 
+        // CRITICAL CHANGE!
+        NONE = 0,
+        HORIZONTAL = 1,
+        VERTICAL = 2,
+        BOTH = 3
     };
 
     struct Image {
