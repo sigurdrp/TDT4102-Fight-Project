@@ -8,9 +8,12 @@
 #include <string>
 
 #include "AnimationWindow.h"
-#include "animation.h"
-#include "utils.h"
-#include "BattleRenderer.h"
+#include "../Animation.h"
+#include "../entities/Player.h"
+#include "../entities/Boss.h"
+#include "../Types.h"
+#include "../utils/utils.h"
+#include "../rendering/BattleRenderer.h"
 
 enum class GameState {
     Menu,

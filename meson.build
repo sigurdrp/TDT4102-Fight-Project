@@ -11,12 +11,16 @@ std_lib_facilities_dep = dependency('std_lib_facilities', fallback: ['std_lib_fa
 compiler_flags = ['-Wconversion', '-fdiagnostics-color=always', '-Werror=return-type', '-static']
 
 src = [
-'animation.cpp',
-'BattleRenderer.cpp',
-'Game.cpp',
-'main.cpp',
-'RunStats.cpp',
-'utils.cpp'
+  'main.cpp',
+  'Animation.cpp',
+  'Collision.cpp',
+  'entities/Entity.cpp',
+  'entities/Player.cpp',
+  'entities/Boss.cpp',
+  'game/Game.cpp',
+  'game/RunStats.cpp',
+  'rendering/BattleRenderer.cpp',
+  'utils/utils.cpp'
 ]
 
 if host_machine.system() == 'windows'
@@ -25,4 +29,10 @@ else
   ld_flags = []
 endif
 
-exe = executable('program', src, dependencies : [std_lib_facilities_dep, animationwindow_dep], cpp_args : compiler_flags, link_args: ld_flags)
+exe = executable(
+  'program',
+  src,
+  dependencies : [std_lib_facilities_dep, animationwindow_dep],
+  cpp_args : compiler_flags,
+  link_args : ld_flags
+)

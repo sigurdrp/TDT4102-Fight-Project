@@ -2,8 +2,10 @@
 
 #include <vector>
 #include "AnimationWindow.h"
-#include "animation.h"
-#include "utils.h"
+#include "../entities/Entity.h"
+#include "../entities/Player.h"
+#include "../entities/Boss.h"
+#include "../utils/utils.h"
 
 class BattleRenderer {
 public:

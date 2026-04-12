@@ -1,5 +1,6 @@
 #include "Game.h"
 #include "RunStats.h"
+#include "Collision.h"
 
 #include <iostream>
 
