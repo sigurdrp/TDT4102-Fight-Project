@@ -10,7 +10,14 @@ std_lib_facilities_dep = dependency('std_lib_facilities', fallback: ['std_lib_fa
 
 compiler_flags = ['-Wconversion', '-fdiagnostics-color=always', '-Werror=return-type', '-static']
 
-src = ['animation.cpp', 'main.cpp', 'utils.cpp']
+src = [
+'animation.cpp',
+'BattleRenderer.cpp',
+'Game.cpp',
+'main.cpp',
+'RunStats.cpp',
+'utils.cpp'
+]
 
 if host_machine.system() == 'windows'
   ld_flags = ['-static', '-lstdc++exp']
